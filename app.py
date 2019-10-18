@@ -19,6 +19,7 @@ import webbrowser
 # json for api
 import json
 
+
 def record_audio(seconds=15, filename='snippet', remove_wav=True):
     """  """
     wav_filename = filename + ".wav"
@@ -49,7 +50,7 @@ def record_audio(seconds=15, filename='snippet', remove_wav=True):
         data = stream.read(CHUNK)
         frames.append(data)
         if i % 60 == 0:
-            print(f"({str(int(i/60))} / {str(seconds)})                \r")
+            print(f"\r({str(int(i/60))} / {str(seconds)})                ")
     print("* done recording")
     stream.stop_stream()
     stream.close()
@@ -77,6 +78,7 @@ def record_audio(seconds=15, filename='snippet', remove_wav=True):
         remove(wav_filename)
     return
 
+
 def audd_api(mp3_filename):
     """  """
     mp3_filename += '.mp3'
@@ -87,37 +89,35 @@ def audd_api(mp3_filename):
     result = r.json()
 
     # checking result status
+    audd_results = None
     if result["status"] == 'error':
         print(f"ERROR {str(result['error']['error_code'])}: {result['error']['error_message']}")
-    if result['status'] == 'success':
+    elif result['status'] == 'success':
         audd_results = result['result']
-        remove(mp3_filename)
+        # TODO: remove(mp3_filename)
 
     ''' test! 
     # with open('test.json', 'r') as f:
     #     audd_results = json.load(f)
     '''
 
-
-    # dict of important info
-    user_track = {
-        'id': [audd_results['result']['spotify']['id']],
-        'title': audd_results['result']['title'],
-        'artist': audd_results['result']['artist'],
-        'album': audd_results['result']['album']
-    }
-    print(f"\nSong Detected: {user_track['title']} by {user_track['artist']} album: {user_track['album']}\n")
-
-def print_tracks(tracks):
-    """  """
-    print(f"~~~~~~~~~~~~~~~ Suggested Tracks ~~~~~~~~~~~~~~~")
-    print(f"~~~~~~~~~~~~~~~ Title, by Artist ~~~~~~~~~~~~~~~")
-
-    for i in range(len(tracks)):
-        print(f"[{str(i)}] | {tracks[i]['title']}, by {tracks[i]['artist']}")
+    # audd_results is None if audd couldn't find anything
+    if audd_results is not None:
+        # dict of important info
+        user_track = {
+            'id': [audd_results['spotify']['id']],
+            'title': audd_results['title'],
+            'artist': audd_results['artist'],
+            'album': audd_results['album']
+        }
+        print(f"\nSong Detected: {user_track['title']} by {user_track['artist']} album: {user_track['album']}\n")
+    else:
+        user_track = None
+        print(f"No song recognized.")
+    return user_track
 
 
-def spotipy_api():
+def spotipy_api(user_track):
     """  """
     client_credentials_manager = SpotifyClientCredentials(client_id='c7db96da8a3c4b47846afacf7f838740',
                                                           client_secret='1cdc68e99a464a6cb671ac9d9dbbd332')
@@ -140,24 +140,72 @@ def process_spotify(results):
     return tracks
 
 
-''' helper functions '''
-def int_input(prompt):
+def print_tracks(tracks):
+    """  """
+    print(f"~~~~~~~~~~~~~~~ Suggested Tracks ~~~~~~~~~~~~~~~")
+    print(f"~~~~~~~~~~~~~~~ Title, by Artist ~~~~~~~~~~~~~~~")
+
+    for i in range(len(tracks)):
+        print(f"[{str(i)}] | {tracks[i]['title']}, by {tracks[i]['artist']}")
+
+
+def int_input(prompt, limit):
+    ''' helper functions '''
     user_int = input(f"{prompt}: ")
-    while not int(user_int).is_integer():
+    while int(user_int) >= limit and not int(user_int) == 0:
         user_int = input(f"{prompt}: ")
     return int(user_int)
 
+
 def str_input(prompt):
+    ''' helper functions '''
     user_str = input(f"{prompt}: ")
     while not type(user_str) == str:
         user_str = input(f"{prompt}: ")
     return user_str
 
-def open_url(url):
-    # check if url is valid
-    print("Opening ")
-    webbrowser.open_new_tab(url)
 
-filename = "snippet"
-record_audio(3, filename)
-audd_api(filename)
+def select_option(prompt, commands):
+    while True:
+        option = str_input(f"{prompt}: ").lower()
+        if option in commands:
+            return option
+        else:
+            print(f'Choose one of the following: {", ".join(commands).upper()}')
+
+
+def open_url(track):
+    print(f"Opening '{track['title']}' by {track['artist']}... ")
+    webbrowser.open_new_tab(track['url'])
+
+
+def begining_prints():
+    print("--> R to begin")
+    print("--> T to begin with test.mp3")
+    print("--> C to select .mp3 filename to pull from")
+
+
+commands = ['r', 't', 'c']
+ask_again = True
+
+while ask_again:
+    begining_prints()
+    sel = select_option('Select a letter', commands)
+
+    if sel == 'r':
+        filename = "snippet"
+        record_audio(15, filename)
+        ask_again = False
+    elif sel == 't':
+        filename = "test"
+        ask_again = False
+    elif sel == 'c':
+        filename = str_input("Enter mp3 filename. {filename}.mp3")
+
+user_track = audd_api(filename)
+if user_track is not None:
+    results = spotipy_api(user_track)
+    tracks = process_spotify(results)
+    print_tracks(tracks)
+    track_index = int_input(f"Select a song to play by choosing 0 - {str(len(tracks)-1)}", len(tracks))
+    open_url(tracks[track_index])
