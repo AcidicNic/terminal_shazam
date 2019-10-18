@@ -3,6 +3,8 @@
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! '''
 
 # record audio (.wav)
+import sys
+
 import pyaudio
 import wave
 # converts the .wav to .mp3
@@ -20,7 +22,7 @@ import webbrowser
 import json
 
 
-def record_audio(seconds=15, filename='snippet', remove_wav=True):
+def record_audio(seconds=15, filename='snippet'):
     """  """
     wav_filename = filename + ".wav"
     mp3_filename = filename + ".mp3"
@@ -41,17 +43,16 @@ def record_audio(seconds=15, filename='snippet', remove_wav=True):
                 input_device_index=0)
 
     # records audio
-    print("* recording\n")
-    ph = " " * 9
-    print(ph)
+    print("\n* recording")
 
     frames = []
     for i in range(int(RATE / CHUNK * seconds)):
         data = stream.read(CHUNK)
         frames.append(data)
         if i % 60 == 0:
-            print(f"\r({str(int(i/60))} / {str(seconds)})                ")
-    print("* done recording")
+            sys.stdout.write(f"\r{str(int(i/60))}/{str(seconds)} seconds...")
+            sys.stdout.flush()
+    print("\n* done recording")
     stream.stop_stream()
     stream.close()
     p.terminate()
@@ -73,10 +74,7 @@ def record_audio(seconds=15, filename='snippet', remove_wav=True):
     # raw_data = sound._data
     # b = base64.b64encode(raw_data)
 
-    # remove wav and mp3 files
-    if remove_wav:
-        remove(wav_filename)
-    return
+    remove(wav_filename)
 
 
 def audd_api(mp3_filename):
@@ -94,7 +92,7 @@ def audd_api(mp3_filename):
         print(f"ERROR {str(result['error']['error_code'])}: {result['error']['error_message']}")
     elif result['status'] == 'success':
         audd_results = result['result']
-        # TODO: remove(mp3_filename)
+        remove(mp3_filename)
 
     ''' test! 
     # with open('test.json', 'r') as f:
@@ -122,7 +120,7 @@ def spotipy_api(user_track):
     client_credentials_manager = SpotifyClientCredentials(client_id='c7db96da8a3c4b47846afacf7f838740',
                                                           client_secret='1cdc68e99a464a6cb671ac9d9dbbd332')
     spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-    results = spotify.recommendations(seed_tracks=user_track['id'], country='US', limit=5)
+    results = spotify.recommendations(seed_tracks=user_track['id'], country='US', limit=10)
     return results
 
 
@@ -167,7 +165,7 @@ def str_input(prompt):
 
 def select_option(prompt, commands):
     while True:
-        option = str_input(f"{prompt}: ").lower()
+        option = str_input(f"{prompt}").lower()
         if option in commands:
             return option
         else:
@@ -180,12 +178,15 @@ def open_url(track):
 
 
 def begining_prints():
-    print("--> R to begin")
-    print("--> T to begin with test.mp3")
-    print("--> C to select .mp3 filename to pull from")
+    print("WELCOME!")
+    print("--> R to begin song detection")
+    # print("--> T to begin with test.mp3")
+    # print("--> E to edit recording time")
+    print("--> E to end the program")
 
 
-commands = ['r', 't', 'c']
+# commands = ['r', 't', 'e']
+commands = ['r', 'e']
 ask_again = True
 
 while ask_again:
@@ -194,18 +195,16 @@ while ask_again:
 
     if sel == 'r':
         filename = "snippet"
-        record_audio(15, filename)
-        ask_again = False
-    elif sel == 't':
-        filename = "test"
-        ask_again = False
-    elif sel == 'c':
-        filename = str_input("Enter mp3 filename. {filename}.mp3")
+        record_audio(10, filename)
+    # elif sel == 't':
+    #     filename = "test"
+    elif sel == 'e':
+        sys.exit()
 
-user_track = audd_api(filename)
-if user_track is not None:
-    results = spotipy_api(user_track)
-    tracks = process_spotify(results)
-    print_tracks(tracks)
-    track_index = int_input(f"Select a song to play by choosing 0 - {str(len(tracks)-1)}", len(tracks))
-    open_url(tracks[track_index])
+    user_track = audd_api(filename)
+    if user_track is not None:
+        results = spotipy_api(user_track)
+        tracks = process_spotify(results)
+        print_tracks(tracks)
+        track_index = int_input(f"\nSelect a song to play by choosing 0-{str(len(tracks)-1)}", len(tracks))
+        open_url(tracks[track_index])
