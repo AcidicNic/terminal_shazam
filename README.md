@@ -5,3 +5,7 @@
 3. "pip3 install -r requirements.txt"
 5. Press R to start listening for a song.
 6. Select the number of which suggested song you'd like to listen to.
+
+![Main Page](main_page.png?raw=true "Main Page")
+![Sign In](Sign_In.png?raw=true "Sign In")
+![Show Playlists](Show_Playlists.png?raw=true "Show Playlists")
