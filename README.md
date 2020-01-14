@@ -11,7 +11,7 @@
 ### Here's a video demo!
 [![Video Demo](https://i.imgur.com/ZYLd9ib.png)](https://www.youtube.com/watch?v=OGoRij7K_YE)
 
-## Wireframes
-![Main Page](main_page.png?raw=true "Main Page")
-![Sign In](Sign_In.png?raw=true "Sign In")
-![Show Playlists](Show_Playlists.png?raw=true "Show Playlists")
+## Wireframes for upcoming webapp
+![Main Page](https://i.imgur.com/eHKAdaU.png "Main Page")
+![Sign In](https://i.imgur.com/MvtPFTL.png "Sign In")
+![Show Playlists](https://i.imgur.com/QmDy6Mo.png "Show Playlists")
