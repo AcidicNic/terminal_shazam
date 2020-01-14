@@ -1,10 +1,8 @@
-''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    brew install ffmpeg for this to work!
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! '''
+''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! brew install ffmpeg for this to work !
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! '''
 
 # record audio (.wav)
-import sys
-
 import pyaudio
 import wave
 # converts the .wav to .mp3
@@ -18,8 +16,32 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 # open spotify webplayer
 import webbrowser
-# json for api
+import sys
+# json for testing
 import json
+import secret
+
+# from bson import ObjectId
+# from flask import Flask, render_template, request, redirect, url_for
+# from pymongo import MongoClient
+#
+# app = Flask(__name__)
+
+#with heroku
+# host = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/appName')
+# client = MongoClient(host=f'{host}?retryWrites=false')
+# db = client.get_default_database()
+
+# without heroku
+# client = MongoClient()
+# db = client.SpotifyIntensive
+#
+# songs = db.songs
+#
+# @app.route('/')
+# def plants_index():
+#     ''' home page, lists all of the plant listings '''
+#     return render_template('index.html', songs=songs.find())
 
 
 def record_audio(seconds=15, filename='snippet'):
@@ -82,7 +104,7 @@ def audd_api(mp3_filename):
     mp3_filename += '.mp3'
     # sending the request
     files = {'file': open(mp3_filename, 'rb')}
-    data = {'return': 'timecode,deezer,spotify', 'api_token': '44e5472ccd1035d6bb88608992c2a878'}
+    data = {'return': 'timecode,deezer,spotify', 'api_token': secret.audd_api_key}
     r = requests.post('https://api.audd.io/', data=data, files=files)
     result = r.json()
 
@@ -108,10 +130,10 @@ def audd_api(mp3_filename):
             'artist': audd_results['artist'],
             'album': audd_results['album']
         }
-        print(f"\nSong Detected: {user_track['title']} by {user_track['artist']} album: {user_track['album']}\n")
+        print(f"\nSong Detected: {user_track['title']} by {user_track['artist']} | album: {user_track['album']}\n")
     else:
         user_track = None
-        print(f"No song recognized.")
+        print(f"\n*** No song recognized, try again. ***")
     return user_track
 
 
@@ -178,7 +200,9 @@ def open_url(track):
 
 
 def begining_prints():
-    print("WELCOME!")
+    print("\n~~~~~~~~~~~~~~~~~ Welcome to [TBD] ~~~~~~~~~~~~~~~~~")
+    print("Play a song and I'll listen through your microphone!")
+    print("I'll find similar songs for you to play next!\n")
     print("--> R to begin song detection")
     # print("--> T to begin with test.mp3")
     # print("--> E to edit recording time")
@@ -196,9 +220,7 @@ while ask_again:
     if sel == 'r':
         filename = "snippet"
         record_audio(10, filename)
-    # elif sel == 't':
-    #     filename = "test"
-    elif sel == 'e':
+    if sel == 'e':
         sys.exit()
 
     user_track = audd_api(filename)
@@ -208,3 +230,8 @@ while ask_again:
         print_tracks(tracks)
         track_index = int_input(f"\nSelect a song to play by choosing 0-{str(len(tracks)-1)}", len(tracks))
         open_url(tracks[track_index])
+
+
+
+# if __name__ == '__main__':
+#     app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
