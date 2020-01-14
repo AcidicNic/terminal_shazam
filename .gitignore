@@ -1,9 +1,0 @@
-venv
-.DS_STORE
-snippet.mp3
-temp_snippet.wav
-spotipy.json
-test.json
-.secret.py
-.idea
-__pycache__
