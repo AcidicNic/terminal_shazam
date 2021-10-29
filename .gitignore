@@ -1,4 +1,6 @@
-venv
+.gitignore
+.venv
+.env
 .DS_STORE
 snippet.mp3
 temp_snippet.wav
