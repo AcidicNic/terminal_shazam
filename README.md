@@ -15,7 +15,7 @@ With a short 5 second audio clip, find the song that's playing and get suggested
 9. Select the number of the suggested song you'd like to listen to.
 
 ### Here's a video demo!
-[![Video Demo](https://i.imgur.com/ZYLd9ib.png)](https://youtu.be/pP2xTfOoLXk)
+[![Video Demo](https://i.imgur.com/IcJpZph.png)](https://youtu.be/pP2xTfOoLXk)
 
 ---
 
