@@ -1,5 +1,5 @@
 # Terminal Shazam Clone
-With a short
+With a short 5 second audio clip, find the song that's playing and get suggested songs from Spotify's API.
 
 1. Ensure you have a working microphone.
 2. `brew install ffmpeg`
